@@ -1,1 +1,1 @@
-Hi, I'm pushing this from terminal :)
+Hi, I'm pushing this from terminal
