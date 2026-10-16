@@ -35,3 +35,7 @@ docker compose down -v                         # also wipe data (mysql/init.sql 
 Open `test/kafka_connect_test.http` in VS Code with the
 [REST Client](https://marketplace.visualstudio.com/items?itemName=humao.rest-client) extension,
 create the connector, then run the requests top to bottom.
+
+## Working Setup on VSCode! 
+<img width="1472" height="931" alt="image" src="https://github.com/user-attachments/assets/12b847f4-0eca-4008-be77-c8ef663497ef" />
+
