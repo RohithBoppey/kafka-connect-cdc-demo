@@ -54,10 +54,49 @@ PUT {{base_url}}/connector-plugins/MySqlConnector/config/validate
 Content-Type: application/json
 
 {
-  "connector.class": "{{plugin}}",
-  "database.hostname": "mysql",
-  "database.port": "3306"
+    "name" : "{{connector}}",
+    "connector.class" : "{{plugin}}",
+    "tasks.max": "1",
+    "database.hostname": "mysql",
+    "database.port": "3306",
+    "database.user": "debezium",
+    "database.password": "dbz",
+    "database.server.id": "184054",
+    "topic.prefix": "dbserver1",
+    "database.include.list": "inventory",
+    "schema.history.internal.kafka.bootstrap.servers": "kafka:29092",
+    "schema.history.internal.kafka.topic": "schema-changes.inventory"
 }
+
+
+# you can filter out the issues using this command: 
+# cat test/response.json | jq '.configs[] | select(.value.errors | length > 0) | {field: .value.name, errors: .value.errors}'
+
+
+### CREATING A NEW CONNECTOR  ==================================================
+# PUT {{base_url}}/connector-plugins/MySqlConnector/config/validate
+POST {{base_url}}/connectors
+Content-Type: application/json
+
+{
+  "name": "{{connector}}",
+  "config": {
+    "connector.class": "{{plugin}}",
+    "tasks.max": "1",
+    "database.hostname": "mysql",
+    "database.port": "3306",
+    "database.user": "debezium",
+    "database.password": "dbz",
+    "database.server.id": "184054",
+    "topic.prefix": "dbserver1",
+    "database.include.list": "inventory",
+    "schema.history.internal.kafka.bootstrap.servers": "kafka:29092",
+    "schema.history.internal.kafka.topic": "schema-changes.inventory"
+  }
+}
+
+# =============================================================================
+
 
 
 # =============================================================================
