@@ -1,0 +1,238 @@
+# Example setup
+# ### Test with Body Type A
+# POST https://example.com
+# Content-Type: application/json
+# {
+#   "name": "John Doe",
+#   "type": "standard"
+# }
+#
+# Kafka Connect REST API - run top to bottom.
+# Ref: https://docs.confluent.io/platform/current/connect/references/restapi.html
+#
+# PRE-REQ: create your Debezium MySQL connector first (not in this file),
+#          then set @connector below to its name.
+#
+# Every request must be separated by a line starting with "###".
+# Content-Type is only needed on requests that send a JSON body.
+
+
+# base url & other variables
+@base_url = http://localhost:8083
+@connector = mysql-inventory-connector
+@task_id = 0
+@plugin = io.debezium.connector.mysql.MySqlConnector
+
+
+# =============================================================================
+# 1. CLUSTER / WORKER INFO
+# =============================================================================
+
+### test if the container is up or not -> worker version, commit, kafka cluster id
+GET {{base_url}}/
+
+### worker health (Kafka 3.9+) -> 200 "healthy" once startup is done
+GET {{base_url}}/health
+
+
+# =============================================================================
+# 2. CONNECTOR PLUGINS (what is installed on the worker)
+# =============================================================================
+
+### list installed connector plugins (source + sink only)
+GET {{base_url}}/connector-plugins
+
+### list ALL plugins, including transforms (SMTs), converters, predicates
+GET {{base_url}}/connector-plugins?connectorsOnly=false
+
+### every config property the MySQL connector accepts (name, type, default, docs)
+GET {{base_url}}/connector-plugins/{{plugin}}/config
+
+### validate a config WITHOUT creating anything -> look at "error_count" and each field's "errors"
+# (intentionally incomplete config, so you can see what validation errors look like)
+PUT {{base_url}}/connector-plugins/MySqlConnector/config/validate
+Content-Type: application/json
+
+{
+  "connector.class": "{{plugin}}",
+  "database.hostname": "mysql",
+  "database.port": "3306"
+}
+
+
+# =============================================================================
+# 3. READING CONNECTORS
+# =============================================================================
+
+### check all the connectors live installed (names only)
+GET {{base_url}}/connectors
+
+### all connectors + their status (connector state + each task's state)
+GET {{base_url}}/connectors?expand=status
+
+### all connectors + their config and task ids
+GET {{base_url}}/connectors?expand=info
+
+### both at once
+GET {{base_url}}/connectors?expand=status&expand=info
+
+### one connector: name, config, tasks, type
+GET {{base_url}}/connectors/{{connector}}
+
+### only its config
+GET {{base_url}}/connectors/{{connector}}/config
+
+### status: RUNNING / PAUSED / STOPPED / FAILED (+ stack trace in "trace" if failed)
+GET {{base_url}}/connectors/{{connector}}/status
+
+### tasks with the config each task was given
+GET {{base_url}}/connectors/{{connector}}/tasks
+
+### status of a single task
+GET {{base_url}}/connectors/{{connector}}/tasks/{{task_id}}/status
+
+### topics this connector has written to (tracked by Connect since it started / last reset)
+GET {{base_url}}/connectors/{{connector}}/topics
+
+### source offsets = where it is in the binlog (file, pos, gtids)
+GET {{base_url}}/connectors/{{connector}}/offsets
+
+
+# =============================================================================
+# 4. LOGGERS (change log levels at runtime, no restart)
+# =============================================================================
+
+### all loggers with an explicitly set level
+GET {{base_url}}/admin/loggers
+
+### root logger level
+GET {{base_url}}/admin/loggers/root
+
+### turn on DEBUG for the MySQL connector -> on THIS worker only. Response = loggers affected
+PUT {{base_url}}/admin/loggers/io.debezium.connector.mysql
+Content-Type: application/json
+
+{
+  "level": "DEBUG"
+}
+
+### check it took effect (now shows last_modified)
+GET {{base_url}}/admin/loggers/io.debezium.connector.mysql
+
+### set it back to INFO on EVERY worker in the cluster (scope=cluster)
+PUT {{base_url}}/admin/loggers/io.debezium.connector.mysql?scope=cluster
+Content-Type: application/json
+
+{
+  "level": "INFO"
+}
+
+
+# =============================================================================
+# 5. LIFECYCLE: pause / resume / restart
+# =============================================================================
+
+### pause -> connector + tasks stop processing but stay assigned (202, async)
+PUT {{base_url}}/connectors/{{connector}}/pause
+
+### should show PAUSED
+GET {{base_url}}/connectors/{{connector}}/status
+
+### resume
+PUT {{base_url}}/connectors/{{connector}}/resume
+
+### should show RUNNING again
+GET {{base_url}}/connectors/{{connector}}/status
+
+### restart ONLY the connector instance (tasks keep running) -> 204
+POST {{base_url}}/connectors/{{connector}}/restart
+
+### restart connector AND all its tasks -> 202 with RESTARTING states
+# onlyFailed=true would restart only the FAILED ones
+POST {{base_url}}/connectors/{{connector}}/restart?includeTasks=true&onlyFailed=false
+
+### restart a single task
+POST {{base_url}}/connectors/{{connector}}/tasks/{{task_id}}/restart
+
+### status after restarts
+GET {{base_url}}/connectors/{{connector}}/status
+
+
+# =============================================================================
+# 6. ACTIVE TOPICS RESET
+# =============================================================================
+
+### clear the set of tracked topics (doesn't delete any Kafka topic)
+PUT {{base_url}}/connectors/{{connector}}/topics/reset
+
+### now empty, fills up again as new events are written
+GET {{base_url}}/connectors/{{connector}}/topics
+
+
+# =============================================================================
+# 7. CONFIG UPDATE
+# =============================================================================
+
+### PATCH = merge only these keys into the existing config (Kafka 3.9+); connector restarts with it
+# (PUT /connectors/{name}/config also works but replaces the WHOLE config - and creates the
+#  connector if it doesn't exist, so it is left out here)
+PATCH {{base_url}}/connectors/{{connector}}/config
+Content-Type: application/json
+
+{
+  "snapshot.fetch.size": "1024"
+}
+
+### confirm the change
+GET {{base_url}}/connectors/{{connector}}/config
+
+
+# =============================================================================
+# 8. OFFSETS (only allowed while the connector is STOPPED)
+# =============================================================================
+
+### stop -> connector + tasks shut down, but the config is kept (unlike DELETE)
+PUT {{base_url}}/connectors/{{connector}}/stop
+
+### should show STOPPED
+GET {{base_url}}/connectors/{{connector}}/status
+
+### current offsets - copy "partition" and "offset" from here into the PATCH below
+GET {{base_url}}/connectors/{{connector}}/offsets
+
+### alter offsets -> move the connector to a different binlog position
+# REPLACE the placeholders with values from the GET above:
+#   "server" = your connector's topic.prefix, file/pos = a binlog position that exists
+# (sending the example as-is gives 400 or makes the connector fail on resume)
+PATCH {{base_url}}/connectors/{{connector}}/offsets
+Content-Type: application/json
+
+{
+  "offsets": [
+    {
+      "partition": { "server": "<topic.prefix>" },
+      "offset": { "file": "mysql-bin.000003", "pos": 157 }
+    }
+  ]
+}
+
+### reset offsets completely -> on resume Debezium starts from scratch (re-snapshots the tables,
+# so you'll get duplicate "r" events in the topics)
+DELETE {{base_url}}/connectors/{{connector}}/offsets
+
+### resume from STOPPED
+PUT {{base_url}}/connectors/{{connector}}/resume
+
+### should be RUNNING, offsets populated again after the snapshot
+GET {{base_url}}/connectors/{{connector}}/offsets
+
+
+# =============================================================================
+# 9. DELETE (last - you'll have to re-create the connector after this)
+# =============================================================================
+
+### delete the connector (its config is removed; Kafka topics + stored offsets remain)
+DELETE {{base_url}}/connectors/{{connector}}
+
+### should no longer be listed
+GET {{base_url}}/connectors

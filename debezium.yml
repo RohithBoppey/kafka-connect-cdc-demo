@@ -20,9 +20,10 @@ services:
       - "8083:8083" # Kafka Connect REST API -> http://localhost:8083
     environment:
       BOOTSTRAP_SERVERS: kafka:29092 # the INTERNAL listener
-      GROUP_ID: my-connect-group     # workers with the same group id form one Connect cluster
+      GROUP_ID: my-connect-group     # workers with the same group id form one Connect cluster - i.e. different kafka connect pods
 
       # Connect stores its own state in these Kafka topics (created automatically)
+      # rather than each task storing state in itself, kafka connect stores the state in kafka only
       CONFIG_STORAGE_TOPIC: my-connect-configs   # connector configs
       OFFSET_STORAGE_TOPIC: my-connect-offsets   # how far each connector has read (e.g. binlog position)
       STATUS_STORAGE_TOPIC: my-connect-status    # connector/task status
