@@ -1,3 +1,7 @@
+# Run this via: 
+# docker compose -f debezium.yml down && docker compose -f debezium.yml up -d
+
+
 # Kafka Connect (with Debezium connectors pre-installed), run as its OWN compose project.
 # It joins the network created by docker-compose.yml, so it can reach kafka + mysql by name.
 #
@@ -28,7 +32,7 @@ services:
       OFFSET_STORAGE_REPLICATION_FACTOR: 1
       STATUS_STORAGE_REPLICATION_FACTOR: 1
     networks:
-      - demo
+      - kcd
     healthcheck:
       test: ["CMD-SHELL", "curl -sf http://localhost:8083/ > /dev/null"]
       interval: 10s
@@ -36,6 +40,8 @@ services:
       retries: 20
 
 networks:
-  demo:
+# connect with the already connected network
+  kcd:
+  # true - assume the network already exists and connect to it
     external: true
-    name: kafka-connect-demo_default # created by docker-compose.yml (project "kafka-connect-demo")
+    name: "kafka_connect_demo" # created by docker-compose.yml (project "kafka-connect-demo")

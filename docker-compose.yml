@@ -1,3 +1,4 @@
+version: "1.0"
 name: kafka-connect-demo
 
 services:
@@ -41,6 +42,9 @@ services:
       interval: 10s
       timeout: 10s
       retries: 10
+    # use the custom network
+    networks: 
+      - kafka_connect_demo
 
   # ---------------------------------------------------------------------------
   # MySQL 8 - binlog enabled in ROW format so Debezium can read changes later
@@ -71,7 +75,15 @@ services:
       interval: 10s
       timeout: 5s
       retries: 10
+    networks:
+      - kafka_connect_demo
 
 volumes:
   kafka-data:
   mysql-data:
+
+# creating my own custom network for all the pods to conncet
+networks: 
+  kafka_connect_demo: 
+    driver: bridge
+    name: "kafka_connect_demo"
