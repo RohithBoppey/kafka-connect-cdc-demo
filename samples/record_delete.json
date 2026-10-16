@@ -1,0 +1,258 @@
+{
+  "schema" : {
+    "type" : "struct",
+    "fields" : [
+      {
+        "type" : "struct",
+        "fields" : [
+          {
+            "type" : "int32",
+            "optional" : false,
+            "field" : "id"
+          },
+          {
+            "type" : "string",
+            "optional" : false,
+            "field" : "name"
+          },
+          {
+            "type" : "string",
+            "optional" : false,
+            "field" : "email"
+          },
+          {
+            "type" : "string",
+            "optional" : true,
+            "name" : "io.debezium.time.ZonedTimestamp",
+            "version" : 1,
+            "field" : "created_at"
+          },
+          {
+            "type" : "int32",
+            "optional" : true,
+            "field" : "TEMP_COLUMN"
+          }
+        ],
+        "optional" : true,
+        "name" : "dbserver1.inventory.customers.Value",
+        "field" : "before"
+      },
+      {
+        "type" : "struct",
+        "fields" : [
+          {
+            "type" : "int32",
+            "optional" : false,
+            "field" : "id"
+          },
+          {
+            "type" : "string",
+            "optional" : false,
+            "field" : "name"
+          },
+          {
+            "type" : "string",
+            "optional" : false,
+            "field" : "email"
+          },
+          {
+            "type" : "string",
+            "optional" : true,
+            "name" : "io.debezium.time.ZonedTimestamp",
+            "version" : 1,
+            "field" : "created_at"
+          },
+          {
+            "type" : "int32",
+            "optional" : true,
+            "field" : "TEMP_COLUMN"
+          }
+        ],
+        "optional" : true,
+        "name" : "dbserver1.inventory.customers.Value",
+        "field" : "after"
+      },
+      {
+        "type" : "struct",
+        "fields" : [
+          {
+            "type" : "string",
+            "optional" : false,
+            "field" : "version"
+          },
+          {
+            "type" : "string",
+            "optional" : false,
+            "field" : "connector"
+          },
+          {
+            "type" : "string",
+            "optional" : false,
+            "field" : "name"
+          },
+          {
+            "type" : "int64",
+            "optional" : false,
+            "field" : "ts_ms"
+          },
+          {
+            "type" : "string",
+            "optional" : true,
+            "name" : "io.debezium.data.Enum",
+            "version" : 1,
+            "parameters" : {
+              "allowed" : "true,first,first_in_data_collection,last_in_data_collection,last,false,incremental"
+            },
+            "default" : "false",
+            "field" : "snapshot"
+          },
+          {
+            "type" : "string",
+            "optional" : false,
+            "field" : "db"
+          },
+          {
+            "type" : "string",
+            "optional" : true,
+            "field" : "sequence"
+          },
+          {
+            "type" : "int64",
+            "optional" : true,
+            "field" : "ts_us"
+          },
+          {
+            "type" : "int64",
+            "optional" : true,
+            "field" : "ts_ns"
+          },
+          {
+            "type" : "string",
+            "optional" : true,
+            "field" : "table"
+          },
+          {
+            "type" : "int64",
+            "optional" : false,
+            "field" : "server_id"
+          },
+          {
+            "type" : "string",
+            "optional" : true,
+            "field" : "gtid"
+          },
+          {
+            "type" : "string",
+            "optional" : false,
+            "field" : "file"
+          },
+          {
+            "type" : "int64",
+            "optional" : false,
+            "field" : "pos"
+          },
+          {
+            "type" : "int32",
+            "optional" : false,
+            "field" : "row"
+          },
+          {
+            "type" : "int64",
+            "optional" : true,
+            "field" : "thread"
+          },
+          {
+            "type" : "string",
+            "optional" : true,
+            "field" : "query"
+          }
+        ],
+        "optional" : false,
+        "name" : "io.debezium.connector.mysql.Source",
+        "version" : 1,
+        "field" : "source"
+      },
+      {
+        "type" : "struct",
+        "fields" : [
+          {
+            "type" : "string",
+            "optional" : false,
+            "field" : "id"
+          },
+          {
+            "type" : "int64",
+            "optional" : false,
+            "field" : "total_order"
+          },
+          {
+            "type" : "int64",
+            "optional" : false,
+            "field" : "data_collection_order"
+          }
+        ],
+        "optional" : true,
+        "name" : "event.block",
+        "version" : 1,
+        "field" : "transaction"
+      },
+      {
+        "type" : "string",
+        "optional" : false,
+        "field" : "op"
+      },
+      {
+        "type" : "int64",
+        "optional" : true,
+        "field" : "ts_ms"
+      },
+      {
+        "type" : "int64",
+        "optional" : true,
+        "field" : "ts_us"
+      },
+      {
+        "type" : "int64",
+        "optional" : true,
+        "field" : "ts_ns"
+      }
+    ],
+    "optional" : false,
+    "name" : "dbserver1.inventory.customers.Envelope",
+    "version" : 2
+  },
+  "payload" : {
+    "before" : {
+      "id" : 3,
+      "name" : "Rohith",
+      "email" : "rohith.boppey@example.com",
+      "created_at" : "2026-10-16T10:47:03Z",
+      "TEMP_COLUMN" : null
+    },
+    "after" : null,
+    "source" : {
+      "version" : "3.2.0.Final",
+      "connector" : "mysql",
+      "name" : "dbserver1",
+      "ts_ms" : 1792151432226,
+      "snapshot" : "false",
+      "db" : "inventory",
+      "sequence" : null,
+      "ts_us" : 1792151432226046,
+      "ts_ns" : 1792151432226046000,
+      "table" : "customers",
+      "server_id" : 1,
+      "gtid" : "9b460b96-c937-11f1-a59a-8aa18085cff9:17",
+      "file" : "mysql-bin.000006",
+      "pos" : 1554,
+      "row" : 0,
+      "thread" : 766,
+      "query" : null
+    },
+    "transaction" : null,
+    "op" : "d",
+    "ts_ms" : 1792151432249,
+    "ts_us" : 1792151432249967,
+    "ts_ns" : 1792151432249967074
+  }
+}

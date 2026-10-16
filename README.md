@@ -25,6 +25,11 @@ docker compose down                            # stop Kafka + MySQL
 docker compose down -v                         # also wipe data (mysql/init.sql runs again on next start)
 ```
 
+## Personal Notes: 
+- schema updates are stored in a different kafka topic - in our case, it is: `schema-changes.inventory`
+- sample responses are there in samples/
+- 
+
 ## Use it
 
 Open `test/kafka_connect_test.http` in VS Code with the
