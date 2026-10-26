@@ -64,6 +64,7 @@ Content-Type: application/json
     "database.server.id": "184054",
     "topic.prefix": "dbserver1",
     "database.include.list": "inventory",
+    "snapshot.mode": "no_data",
     "schema.history.internal.kafka.bootstrap.servers": "kafka:29092",
     "schema.history.internal.kafka.topic": "schema-changes.inventory"
 }
@@ -75,6 +76,27 @@ Content-Type: application/json
 
 ### CREATING A NEW CONNECTOR  ==================================================
 # PUT {{base_url}}/connector-plugins/MySqlConnector/config/validate
+# Possible values for the snapshot mdoe: 
+# "value": {
+#         "name": "snapshot.mode",
+#         "value": null,
+#         "recommended_values": [
+#           "always",
+#           "never",
+#           "initial_only",
+#           "configuration_based",
+#           "when_needed",
+#           "initial",
+#           "custom",
+#           "schema_only",
+#           "no_data",
+#           "recovery",
+#           "schema_only_recovery"
+#         ],
+#         "errors": [],
+#         "visible": true
+#       }
+
 POST {{base_url}}/connectors
 Content-Type: application/json
 
@@ -90,6 +112,7 @@ Content-Type: application/json
     "database.server.id": "184054",
     "topic.prefix": "dbserver1",
     "database.include.list": "inventory",
+    "snapshot.mode": "no_data", // 
     "schema.history.internal.kafka.bootstrap.servers": "kafka:29092",
     "schema.history.internal.kafka.topic": "schema-changes.inventory"
   }

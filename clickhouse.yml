@@ -1,0 +1,41 @@
+# ClickHouse, run as its OWN compose project on the same network as Kafka.
+#
+#   docker compose -f clickhouse.yml up -d --wait
+#   docker compose -f clickhouse.yml down        # add -v to wipe data (database is re-created on next start)
+#
+# Requires docker-compose.yml to be up first (it creates the network).
+name: kafka-connect-demo-clickhouse
+
+services:
+  clickhouse:
+    image: clickhouse/clickhouse-server:25.8
+    container_name: clickhouse
+    hostname: clickhouse
+    ports:
+      - "8123:8123" # HTTP interface -> http://localhost:8123 (also has a web SQL UI at /play)
+      - "9000:9000" # native protocol (clickhouse-client, DBeaver, etc.)
+    environment:
+      CLICKHOUSE_DB: inventory          # created on first start, empty - no tables
+      CLICKHOUSE_USER: default
+      CLICKHOUSE_PASSWORD: clickhouse
+    ulimits:
+      nofile:
+        soft: 262144
+        hard: 262144
+    volumes:
+      - clickhouse-data:/var/lib/clickhouse
+    networks:
+      - kcd
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:8123/ping || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  clickhouse-data:
+
+networks:
+  kcd:
+    external: true
+    name: "kafka_connect_demo" # created by docker-compose.yml
