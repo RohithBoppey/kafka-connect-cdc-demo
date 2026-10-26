@@ -1,7 +1,7 @@
 # ClickHouse, run as its OWN compose project on the same network as Kafka.
 #
 #   docker compose -f clickhouse.yml up -d --wait
-#   docker compose -f clickhouse.yml down        # add -v to wipe data (database is re-created on next start)
+#   docker compose -f clickhouse.yml down        # data survives in the named volume; add -v to wipe it (init.sql re-runs on next start)
 #
 # Requires docker-compose.yml to be up first (it creates the network).
 name: kafka-connect-demo-clickhouse
@@ -24,6 +24,7 @@ services:
         hard: 262144
     volumes:
       - clickhouse-data:/var/lib/clickhouse
+      - ./clickhouse/init.sql:/docker-entrypoint-initdb.d/init.sql:ro # runs only when data dir is empty
     networks:
       - kcd
     healthcheck:
@@ -34,6 +35,7 @@ services:
 
 volumes:
   clickhouse-data:
+    name: kafka-connect-demo-clickhouse # fixed name, so a project rename can't orphan it
 
 networks:
   kcd:

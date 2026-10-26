@@ -3,3 +3,7 @@
 /test/response.json
 
 *.session.sql
+
+/**.env
+
+/data/

@@ -35,6 +35,10 @@ services:
       KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
       KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
       KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
+
+      # --- Storage ---
+      # the image defaults to /tmp/kafka-logs (inside the container, lost on rm); point it at the volume
+      KAFKA_LOG_DIRS: /var/lib/kafka/data
     volumes:
       - kafka-data:/var/lib/kafka/data
     healthcheck:
@@ -80,7 +84,9 @@ services:
 
 volumes:
   kafka-data:
+    name: kafka-connect-demo-kafka-data # fixed name, so a project rename can't orphan it
   mysql-data:
+    name: kafka-connect-demo-mysql # fixed name, so a project rename can't orphan it
 
 # creating my own custom network for all the pods to conncet
 networks: 
