@@ -27,8 +27,7 @@ docker compose down -v                         # also wipe data (mysql/init.sql 
 
 ## Personal Notes: 
 - schema updates are stored in a different kafka topic - in our case, it is: `schema-changes.inventory`
-- sample responses are there in samples/
-- 
+- sample responses are there in `samples/` folder
 
 ## Use it
 
